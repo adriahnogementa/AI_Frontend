@@ -13,7 +13,7 @@ const App = () => {
     setLoading(true);
     setChatLog([...chatLog, { user: "me", message: input }]);
     setInput("");
-    
+
     try {
       const response = await fetch('http://localhost:11434/api/chat', {
         method: 'POST',
@@ -39,7 +39,7 @@ const App = () => {
         // Wenn 'choices' nicht vorhanden ist oder leer ist, handle den Fall entsprechend
         console.error('No choices available in API response');
       }
-  
+
       setLoading(false);
     } catch (error) {
       console.error('Error:', error);
@@ -82,11 +82,11 @@ const App = () => {
               return <ChatMessage key={i} message={el} mode={mode} />
             })
             :
-            
+
             <h1 className='start-converstion' >
-             <img src="..\assets\AirITSystems-Logo.png" alt="Logo" className="logo" />
-             <br></br>
-             <br></br>
+              <img src="..\assets\AirITSystems-Logo.png" alt="Logo" className="logo" />
+              <br></br>
+              <br></br>
               KI Chat Bot<br />
               <span className='sub-text'>Gebe eine Frage ein und ich werde dir schon helfen!</span>
             </h1>
