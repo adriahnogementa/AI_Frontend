@@ -30,6 +30,7 @@ const App = () => {
         })
       });
 
+
       const data = await response.json();
       console.log(data);
 
@@ -67,7 +68,7 @@ const App = () => {
           <div className='side-menu-newChat' onClick={changeMode}>
             <span className='plus'>
               <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
-            Light Mode
+            {mode === 'dark' ? "Light Mode" : "Dark Mode"}
           </div>
         </div>
       </aside>
@@ -124,14 +125,13 @@ const ChatMessage = ({ message, mode }) => {
   return (
     <div className={`chat-message ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`} >
       <div className='chat-message-center'>
-        <div className={`avatar ${message.user === 'chatgpt' && 'chatGPT'}`}>
-          {
-            message.user === 'chatgpt' &&
-            <svg width="30" height="30" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg" strokeWidth="1.5" class="h-6 w-6">
-            </svg>
+      <img src= {message.user === 'me' ? "..\\assets\\user-message.png" : "..\\assets\\ai-message.png"} className="avatar" />
+        {
+          message.user === 'chatgpt' &&
+          <svg width="30" height="30" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg" strokeWidth="1.5" class="h-6 w-6">
+          </svg>
 
-          }
-        </div>
+        }
         <div className='message' >
           {/* Hier können Sie die Nachricht formatieren */}
           <p>{message.message}</p>
