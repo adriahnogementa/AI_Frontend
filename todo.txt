@@ -18,3 +18,4 @@ Adrian:
 
   - Möglichkeit der Erstellung neuer Chats sowie der Speicherung der vorhandenen Chats
   - Löschung der Chats und Umbenennung.
+  - translate : boolean
