@@ -18,14 +18,14 @@ Führen Sie die folgenden Schritte aus, um das Projekt lokal einzurichten:
 
 3. Installieren Sie die Abhängigkeiten:
 
-´npm install´
+`npm install`
 
 
 ## Verwendung
 
 Um die Anwendung lokal auszuführen, verwenden Sie den folgenden Befehl:
 
-´npm run dev´
+`npm run dev`
 
 
 Nachdem die Anwendung gestartet wurde, können Sie Ihren Webbrowser öffnen und auf `http://localhost:3000` zugreifen, um den Chatbot zu verwenden.
