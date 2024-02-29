@@ -12,6 +12,7 @@ Seppo:
 Maik:
   - Der Bug mit Light/Dark Mode ändert sich nicht.
   - Die Avatare bei den Antworten sehen komisch aus, wenn die Antwort lang ist. Vllt auch schönere Bilder verwenden. Vllt kleines AirItLogo für die Antworten.
+  - Favicon einbauen
 
 Adrian:
 
