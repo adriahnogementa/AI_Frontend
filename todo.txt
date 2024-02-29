@@ -1,0 +1,14 @@
+Aufgaben, die zu erledigen sind.
+
+
+Seppo:
+  - Formatierung der Texte soll gut aussehen. Antworten von der KI werden nicht schön dargestellt. Vor allem werden keine neuen Zeilen etc. gemacht.
+
+Maik:
+  - Der Bug mit Light/Dark Mode ändert sich nicht.
+  - Die Avatare bei den Antworten sehen komisch aus, wenn die Antwort lang ist. Vllt auch schönere Bilder verwenden. Vllt kleines AirItLogo für die Antworten.
+
+Adrian:
+
+  - Möglichkeit der Erstellung neuer Chats sowie der Speicherung der vorhandenen Chats
+  - Löschung der Chats und Umbenennung.
