@@ -1,15 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "../styles/main.css";
 import "../styles/normalize.css";
+import "../styles/loader.css";
 
 const App = () => {
   const [input, setInput] = useState("");
   const [chatLog, setChatLog] = useState([]);
   const [mode, setMode] = useState('dark');
   const [loading, setLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState(getChatHistory());
+  const [selectedChatNumber, setSelectedChatNumber] = useState(getNextChatId() );
+  const [highestChatNumber] = useState(getHighestChatNumber());
 
+  useEffect(() => {
+    if (highestChatNumber !== -1) {
+      const chat = getChatByNumber(selectedChatNumber-1);
+      console.log('chat', chat);
+      if (chat && chat.messages) {
+        loadChat(chat);
+      }
+    }
+  }, []);
+  
+
+  const getChatByNumber = (chatNumber) => {
+    const storedChatHistory = getChatHistory();
+    console.log('storedChatHistory', storedChatHistory);
+    return storedChatHistory[chatNumber];
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!input.trim()) return;
     setLoading(true);
     setChatLog([...chatLog, { user: "me", message: input }]);
     setInput("");
@@ -35,13 +57,12 @@ const App = () => {
 
       if (data.message) {
         setChatLog(prev => [...prev, { user: "mistral", message: data.message.content }]);
-      } else {
-        // Wenn 'choices' nicht vorhanden ist oder leer ist, handle den Fall entsprechend
-        console.error('No choices available in API response');
+        saveToLocalStorage(input, data.message.content);
       }
 
       setLoading(false);
     } catch (error) {
+      setChatLog(prev => [...prev, { user: "mistral", message: "Entschuldigung, ich konnte deine Anfrage nicht verarbeiten." }]);
       console.error('Error:', error);
       setLoading(false);
     }
@@ -55,12 +76,124 @@ const App = () => {
     setMode(mode === 'dark' ? 'white' : 'dark');
   }
 
+  const handleNewChatIconClick = () => {
+    if (getChatHistory().length == 0) {
+      return;
+    }
+    console.log('getHighestChatNumber', getHighestChatNumber());
+    console.log('getChatByNumber(getHighestChatNumber())', getChatByNumber(getHighestChatNumber()));
+    if (getChatByNumber(getHighestChatNumber()).messages.length === 0) {
+      return;
+    }
+
+    let chatHistory = getChatHistory();
+
+    chatHistory.push({
+      chatId: getNextChatId(),
+      chatName: "Chat #" + getNextChatId(),
+      messages: []
+    });
+
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    setChatHistory(chatHistory);
+    clearChat();
+    setSelectedChatNumber(getHighestChatNumber()-1);
+  }
+
+  function getChatHistory() {
+    return JSON.parse(localStorage.getItem("chatHistory")) || [];
+  }
+
+  function getNextChatId(){
+    let chatHistory = getChatHistory();    
+    if (chatHistory.length === 0) {
+      return 0;
+    }
+    let length = chatHistory.length;
+  
+    return chatHistory[length - 1].chatId + 1;
+  }
+  
+
+
+  function saveToLocalStorage(request, response) {
+    let chatHistory = getChatHistory();
+    if (chatHistory.length === 0) {
+console.log('chatHistory im LS', chatHistory);
+      chatHistory.push({
+        chatId: 0,
+        chatName: "Chat #0",
+        messages: []
+      });
+      setSelectedChatNumber(0);
+      const chatToStoreData = chatHistory.find(chat => chat.chatId === 0);
+
+      console.log('selectedChatNumber', selectedChatNumber);
+      console.log('chatToStoreData', chatToStoreData);
+
+
+      chatToStoreData.messages.push({
+        messageNumber: 1,
+        request: request,
+        response: response
+      });
+
+    }else{
+    console.log('selectedChatNumber', selectedChatNumber);
+  
+    const chatToStoreData = chatHistory.find(chat => chat.chatId === selectedChatNumber);
+
+     let messageCounter = chatToStoreData.messages.length +1;
+
+      chatToStoreData.messages.push({
+        messageNumber: messageCounter,
+        request: request,
+        response: response
+      });
+   
+    }
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    setChatHistory([...chatHistory]); 
+  }
+  
+
+function loadChat(chat) {
+  clearChat();
+  setSelectedChatNumber(chat.chatId);
+  
+  for (let i = 0; i < chat.messages.length; i++) {
+    const message = chat.messages[i];
+    setChatLog(prev => [...prev, { user: "me", message: message.request }]);
+    setChatLog(prev => [...prev, { user: "mistral", message: message.response }]);
+  }
+
+}
+
+function getHighestChatNumber() {
+  return  getNextChatId() - 1;
+}
+
+
+  
+  
 
   return (
     <div className='app'>
       <aside className='side-menu'>
-        <div className='side-menu-newChat' onClick={clearChat}>
-          <span className='plus'>+</span> New chat
+        <div className='side-menu-newChat' onClick={handleNewChatIconClick}>
+          <span className='plus'>+</span> Neuer chat
+        </div>
+        <div className='chat-history'>
+          <ul>
+            {chatHistory.slice(0).reverse().map((chat, index) => (
+            <li key={index}>
+              <div className='side-menu-newChat' onClick={() => loadChat(chat)} id={chat.chatId}>
+                {chat.chatName}
+              </div>
+            </li>
+          ))}
+
+          </ul>
         </div>
         <div className='side-menu-bottom'>
           <hr />
@@ -72,17 +205,12 @@ const App = () => {
         </div>
       </aside>
       <section className={`chatbox ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`} >
-
-
-
-
         <div className='chat-log'>
           {chatLog.length > 0 ?
             chatLog.map((el, i) => {
               return <ChatMessage key={i} message={el} mode={mode} />
             })
             :
-
             <h1 className='start-converstion' >
               <img src="..\assets\AirITSystems-Logo.png" alt="Logo" className="logo" />
               <br></br>
@@ -92,17 +220,11 @@ const App = () => {
             </h1>
           }
         </div>
-
-
-
-
-
-
         <div className={`chat-input blur`} >
           <div className={`chat-input-div`} >
             <form onSubmit={handleSubmit}>
               <input
-                placeholder='Start hier zu schreiben...'
+                placeholder='Frage eingeben...'
                 className={`chat-input-box ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`}
                 value={input}
                 disabled={loading}
@@ -110,7 +232,14 @@ const App = () => {
               />
             </form>
             <span className='chat-input-icon'>
-              <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-1" height="1.13em" width="1.13em" xmlns="http://www.w3.org/2000/svg"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              {loading ? (
+                <div className="loader"></div>
+              ) : (
+                <svg onClick={handleSubmit}  stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-1" height="1.13em" width="1.13em" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              )}
             </span>
           </div>
         </div>
@@ -129,11 +258,9 @@ const ChatMessage = ({ message, mode }) => {
             message.user === 'chatgpt' &&
             <svg width="30" height="30" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg" strokeWidth="1.5" class="h-6 w-6">
             </svg>
-
           }
         </div>
         <div className='message' >
-          {/* Hier können Sie die Nachricht formatieren */}
           <p>{message.message}</p>
         </div>
       </div>
