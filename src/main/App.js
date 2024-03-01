@@ -169,13 +169,32 @@ function loadChat(chat) {
 
 }
 
-function getHighestChatNumber() {
-  return  getNextChatId() - 1;
+function editChat(selectedChat) {
+  console.log('chat', selectedChat);
+  const newChatName = prompt("Neuer Chat Name", selectedChat.chatName);
+  if (newChatName) {
+    let chatHistory = getChatHistory();
+    const chatToEdit = chatHistory.find(chat => chat.chatId === selectedChat.chatId);
+    console.log('chatToEdit', chatToEdit);
+    chatToEdit.chatName = newChatName;
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    setChatHistory(chatHistory);
+  }
 }
 
+function deleteChat(selectedChat) {
+  if (window.confirm("Möchtest du diesen Chat wirklich löschen?")) {
+    let chatHistory = getChatHistory();
+    chatHistory = chatHistory.filter(chat => chat.chatId !== selectedChat.chatId);
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+    setChatHistory(chatHistory);
+  }
 
-  
-  
+}
+
+function getHighestChatNumber() {
+  return  getNextChatId() - 1;
+} 
 
   return (
     <div className='app'>
@@ -186,20 +205,36 @@ function getHighestChatNumber() {
         <div className='chat-history'>
           <ul>
             {chatHistory.slice(0).reverse().map((chat, index) => (
-            <li key={index}>
-              <div className='side-menu-newChat' onClick={() => loadChat(chat)} id={chat.chatId}>
-                {chat.chatName}
-              </div>
-            </li>
-          ))}
-
+              <li key={index}>
+                <div className='side-menu-newChat' onClick={() => loadChat(chat)} id={chat.chatId}>
+                  <div style={{width: '180px'}}>
+                  {chat.chatName}
+                  </div>
+                  <div style={{ display: 'flex' }}>
+                    <img src="..\assets\edit.svg" alt="editLogo" style={{ width: '20px', height: '20px' }} onClick={() => editChat(chat)}/>
+                    <img src="..\assets\delete.svg" alt="deleteLogo" style={{ width: '20px', height: '20px' }} onClick={() => deleteChat(chat)} />
+                  </div>
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
         <div className='side-menu-bottom'>
           <hr />
           <div className='side-menu-newChat' onClick={changeMode}>
             <span className='plus'>
-              <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+              <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            </span>
             Light Mode
           </div>
         </div>
