@@ -8,15 +8,13 @@ const App = () => {
   const [chatLog, setChatLog] = useState([]);
   const [mode, setMode] = useState('dark');
   const [loading, setLoading] = useState(false);
-  const [chatEntries, setChatEntries] = useState(getChatHistory().length-1);
   const [chatHistory, setChatHistory] = useState(getChatHistory());
-  const [selectedChat, setselectedChat] = useState(getChatHistory()[chatHistory.length - 1]);
+  const [selectedChatNumber, setSelectedChatNumber] = useState(getNextChatId() );
+  const [highestChatNumber] = useState(getHighestChatNumber());
 
   useEffect(() => {
-    const highestChatNumber = getHighestChatNumber();
-    setselectedChat(chatHistory[chatHistory.length - 1]);
     if (highestChatNumber !== -1) {
-      const chat = getChatByNumber(highestChatNumber);
+      const chat = getChatByNumber(selectedChatNumber-1);
       console.log('chat', chat);
       if (chat && chat.messages) {
         loadChat(chat);
@@ -25,15 +23,10 @@ const App = () => {
   }, []);
   
 
-  const getHighestChatNumber = () => {
-    const storedChatHistory = getChatHistory();
-    let highestChatNumber = storedChatHistory.length;
-    return highestChatNumber;
-  };
-
   const getChatByNumber = (chatNumber) => {
     const storedChatHistory = getChatHistory();
-    return storedChatHistory[chatNumber - 1];
+    console.log('storedChatHistory', storedChatHistory);
+    return storedChatHistory[chatNumber];
   };
   
   const handleSubmit = async (e) => {
@@ -44,7 +37,7 @@ const App = () => {
     setInput("");
 
     try {
-      /*const response = await fetch('http://localhost:11434/api/chat', {
+      const response = await fetch('http://localhost:11434/api/chat', {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
@@ -61,12 +54,7 @@ const App = () => {
 
       const data = await response.json();
       console.log(data);
-      */
-      const data = {
-        message: {
-          content: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr"
-        }
-      }
+
       if (data.message) {
         setChatLog(prev => [...prev, { user: "mistral", message: data.message.content }]);
         saveToLocalStorage(input, data.message.content);
@@ -74,6 +62,7 @@ const App = () => {
 
       setLoading(false);
     } catch (error) {
+      setChatLog(prev => [...prev, { user: "mistral", message: "Entschuldigung, ich konnte deine Anfrage nicht verarbeiten." }]);
       console.error('Error:', error);
       setLoading(false);
     }
@@ -88,75 +77,89 @@ const App = () => {
   }
 
   const handleNewChatIconClick = () => {
+    if (getChatHistory().length == 0) {
+      return;
+    }
+    console.log('getHighestChatNumber', getHighestChatNumber());
+    console.log('getChatByNumber(getHighestChatNumber())', getChatByNumber(getHighestChatNumber()));
+    if (getChatByNumber(getHighestChatNumber()).messages.length === 0) {
+      return;
+    }
 
-    setChatEntries(prev => prev + 1);
-    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    let chatHistory = getChatHistory();
 
     chatHistory.push({
-      chatId: chatHistory.length,
-      chatName: "Chat #" + chatHistory.length,
+      chatId: getNextChatId(),
+      chatName: "Chat #" + getNextChatId(),
       messages: []
     });
 
     localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
     setChatHistory(chatHistory);
     clearChat();
+    setSelectedChatNumber(getHighestChatNumber()-1);
+  }
+
+  function getChatHistory() {
+    return JSON.parse(localStorage.getItem("chatHistory")) || [];
+  }
+
+  function getNextChatId(){
+    let chatHistory = getChatHistory();    
+    if (chatHistory.length === 0) {
+      return 0;
+    }
+    let length = chatHistory.length;
+  
+    return chatHistory[length - 1].chatId + 1;
   }
   
 
 
-function getChatHistory() {
-  return JSON.parse(localStorage.getItem("chatHistory")) || [];
-}
+  function saveToLocalStorage(request, response) {
+    let chatHistory = getChatHistory();
+    if (chatHistory.length === 0) {
+console.log('chatHistory im LS', chatHistory);
+      chatHistory.push({
+        chatId: 0,
+        chatName: "Chat #0",
+        messages: []
+      });
+      setSelectedChatNumber(0);
+      const chatToStoreData = chatHistory.find(chat => chat.chatId === 0);
 
+      console.log('selectedChatNumber', selectedChatNumber);
+      console.log('chatToStoreData', chatToStoreData);
+
+
+      chatToStoreData.messages.push({
+        messageNumber: 1,
+        request: request,
+        response: response
+      });
+
+    }else{
+    console.log('selectedChatNumber', selectedChatNumber);
   
+    const chatToStoreData = chatHistory.find(chat => chat.chatId === selectedChatNumber);
 
-function saveToLocalStorage(request, response) {
-  if (!localStorage.getItem("chatHistory")) {
-    localStorage.setItem("chatHistory", JSON.stringify([]));
-    setChatEntries(prev => prev + 1);
-    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+     let messageCounter = chatToStoreData.messages.length +1;
 
-    chatHistory.push({
-      chatId: chatHistory.length,
-      chatName: "Chat #" + chatHistory.length,
-      messages: []
-    });
+      chatToStoreData.messages.push({
+        messageNumber: messageCounter,
+        request: request,
+        response: response
+      });
+   
+    }
     localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-    setChatHistory(chatHistory);
-
-  } else{
-
-  
-  let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
-
-
-  if (chatHistory.length === 0 || !chatHistory[chatHistory.length - 1].hasOwnProperty('messages')) {
-    chatHistory.push({
-      chatId: chatHistory.length,
-      chatName: "Chat #" + chatHistory.length,
-      messages: []
-    });
+    setChatHistory([...chatHistory]); 
   }
-
-  chatHistory = chatHistory.find(chat => chat.chatId === selectedChat.chatId)
-
-
-
-  chatHistory.messages.push({
-    messageNumber: chatHistory.messages.length + 1,
-    request: request,
-    response: response
-  });
-
-  localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-}
-
-}
+  
 
 function loadChat(chat) {
   clearChat();
-  console.log('loading chat', chat);
+  setSelectedChatNumber(chat.chatId);
   
   for (let i = 0; i < chat.messages.length; i++) {
     const message = chat.messages[i];
@@ -165,6 +168,11 @@ function loadChat(chat) {
   }
 
 }
+
+function getHighestChatNumber() {
+  return  getNextChatId() - 1;
+}
+
 
   
   
