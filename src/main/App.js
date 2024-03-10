@@ -3,9 +3,6 @@ import "../styles/main.css";
 import "../styles/normalize.css";
 import "../styles/loader.css";
 
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
 const App = () => {
   const [input, setInput] = useState("");
   const [chatLog, setChatLog] = useState([]);
@@ -320,6 +317,19 @@ const App = () => {
 export default App
 
 const ChatMessage = ({ message, mode }) => {
+
+  const formatTextToHTML = (text) => {
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\n\n/g, '</p><p>');
+    text = text.replace(/\n/g, '<br>');
+    text = text.replace(/(\d+\.\s)/g, '</li><li>');
+    text = '<p>' + text + '</p>';
+    text = text.replace(/<p>(\d+\.\s)(.*?)<\/p>/g, '<ul><li>$2</li></ul>');
+    text = text.replace(/\b(?:https?|ftp):\/\/\S+\b/g, match => `<a href="${match}" target="_blank">${match}</a>`);
+
+    return text;
+  }
+
   return (
     <div className={`chat-message ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`} >
       <div className='chat-message-center'>
@@ -331,7 +341,7 @@ const ChatMessage = ({ message, mode }) => {
           }
         </div>
         <div className='message' >
-          <p>{message.message}</p>
+          <p dangerouslySetInnerHTML={{ __html: formatTextToHTML(message.message) }}></p>
         </div>
       </div>
     </div>
