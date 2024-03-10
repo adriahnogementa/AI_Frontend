@@ -6,6 +6,7 @@
     background: currentColor;
     border-radius: 50%;
     position: relative;
+    cursor: pointer;
   }
   .loader:before {
     content: "";

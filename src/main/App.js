@@ -6,14 +6,17 @@ import "../styles/loader.css";
 const App = () => {
   const [input, setInput] = useState("");
   const [chatLog, setChatLog] = useState([]);
-  const [mode, setMode] = useState('dark');
+  const [mode, setMode] = useState(() => {
+    const savedMode = localStorage.getItem('mode');
+    return savedMode ? savedMode : 'dark';
+  });
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState(getChatHistory());
   const [selectedChatNumber, setSelectedChatNumber] = useState(getNextChatId());
   const [highestChatNumber] = useState(getHighestChatNumber());
+  const [abortController, setAbortController] = useState(new AbortController());
 
   useEffect(() => {
-    console.log('useeffect', getChatById(getHighestChatNumber()));
     if (highestChatNumber !== -1) {
       const chat = getChatById(getHighestChatNumber());
       if (chat && chat.messages) {
@@ -23,14 +26,18 @@ const App = () => {
 
   }, []);
 
-
+  useEffect(() => {
+    localStorage.setItem('mode', mode);
+  }, [mode]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
     setLoading(true);
     setChatLog([...chatLog, { user: "me", message: input }]);
     setInput("");
-
+    const controller = new AbortController();
+    setAbortController(controller);
+  
     try {
       const response = await fetch('http://localhost:11434/api/chat', {
         method: 'POST',
@@ -44,17 +51,18 @@ const App = () => {
             content: input
           }],
           stream: false
-        })
+        }),
+        signal: controller.signal 
       });
-
+  
       const data = await response.json();
       console.log(data);
-
+  
       if (data.message) {
         setChatLog(prev => [...prev, { user: "mistral", message: data.message.content }]);
         saveToLocalStorage(input, data.message.content);
       }
-
+  
       setLoading(false);
     } catch (error) {
       setChatLog(prev => [...prev, { user: "mistral", message: "Entschuldigung, ich konnte deine Anfrage nicht verarbeiten." }]);
@@ -62,7 +70,8 @@ const App = () => {
       saveToLocalStorage(input, "Entschuldigung, ich konnte deine Anfrage nicht verarbeiten.");
       setLoading(false);
     }
-  }
+  };
+  
 
   const clearChat = () => {
     setChatLog([]);
@@ -81,20 +90,25 @@ const App = () => {
     }
 
     let chatHistory = getChatHistory();
+    let nextId = getNextChatId();
 
     chatHistory.push({
-      chatId: getNextChatId(),
-      chatName: "Chat #" + getNextChatId(),
+      chatId: nextId,
+      chatName: "Chat #" + nextId,
       messages: []
     });
 
     localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
     setChatHistory(chatHistory);
     clearChat();
-    setSelectedChatNumber(getHighestChatNumber());
-    console.log('selectedChatNumber', selectedChatNumber);
-    loadChat(selectedChatNumber);
+    loadChat(getChatById(nextId));
   }
+
+  const cancelRequest = async () => {
+    abortController.abort();
+    setLoading(false);
+  };
+  
 
   function getChatHistory() {
     return JSON.parse(localStorage.getItem("chatHistory")) || [];
@@ -118,7 +132,6 @@ const App = () => {
   function saveToLocalStorage(request, response) {
     let chatHistory = getChatHistory();
     if (chatHistory.length === 0) {
-      console.log('chatHistory im LS', chatHistory);
       chatHistory.push({
         chatId: 0,
         chatName: "Chat #0",
@@ -127,10 +140,6 @@ const App = () => {
       setSelectedChatNumber(0);
       const chatToStoreData = chatHistory.find(chat => chat.chatId === 0);
 
-      console.log('selectedChatNumber', selectedChatNumber);
-      console.log('chatToStoreData', chatToStoreData);
-
-
       chatToStoreData.messages.push({
         messageNumber: 1,
         request: request,
@@ -138,8 +147,6 @@ const App = () => {
       });
 
     } else {
-      console.log('selectedChatNumber', selectedChatNumber);
-
       const chatToStoreData = chatHistory.find(chat => chat.chatId === selectedChatNumber);
 
       let messageCounter = chatToStoreData.messages.length + 1;
@@ -157,7 +164,6 @@ const App = () => {
 
 
   function loadChat(chat) {
-    console.log('loadChat', chat);
     clearChat();
     setSelectedChatNumber(chat.chatId);
 
@@ -182,12 +188,10 @@ const App = () => {
   }
 
   function editChat(selectedChat) {
-    console.log('chat', selectedChat);
     const newChatName = prompt("Neuer Chat Name", selectedChat.chatName);
     if (newChatName) {
       let chatHistory = getChatHistory();
       const chatToEdit = chatHistory.find(chat => chat.chatId === selectedChat.chatId);
-      console.log('chatToEdit', chatToEdit);
       chatToEdit.chatName = newChatName;
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
       setChatHistory(chatHistory);
@@ -197,35 +201,30 @@ const App = () => {
   function deleteChat(event, selectedChat) {
     event.stopPropagation();
     if (getChatHistory().length === 1) {
-      alert("Du kannst den letzten Chat nicht löschen!");
-      return;
-    }
+      if (window.confirm("Möchtest du diesen Chatinhalt wirklich löschen?")) {
+      let chatHistory = getChatHistory();
+      chatHistory.find(chat => chat.chatId === selectedChat.chatId).messages = [];
+      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+      setChatHistory(chatHistory);
+      clearChat();
+      loadChat(getChatById(selectedChat.chatId));
+      }
+    }else{
     if (window.confirm("Möchtest du diesen Chat wirklich löschen?")) {
       let chats = getChatHistory();
       chats = chats.filter(chat => chat.chatId !== selectedChat.chatId);
-      console.log('new chats', chats);
       localStorage.setItem("chatHistory", JSON.stringify(chats));
       setChatHistory(chats);
-      loadChatById(getLowerOrHigherChatNumber(selectedChat));
+      if (selectedChat.chatId === selectedChatNumber) {
+        console.log("highestChatNumber: " + getHighestChatNumber());
+        loadChatById(getHighestChatNumber());
+      }
     }
-
+  }
   }
 
   function getHighestChatNumber() {
     return getNextChatId() - 1;
-  }
-
-  //Hier weiter machen. Das Focus auf den nächsten Chat funktioniert nicht
-  function getLowerOrHigherChatNumber(toDeleteChat) {
-    const chats = getChatHistory();
-    const chatNumber = toDeleteChat.chatId;
-
-    if (chats[chatNumber + 1] === undefined) {
-      return chatNumber - 1;
-    }
-
-    return chatNumber + 1;
-
   }
 
   return (
@@ -238,7 +237,7 @@ const App = () => {
           <ul>
             {chatHistory.slice(0).reverse().map((chat, index) => (
               <li key={index}>
-                <div className='side-menu-newChat' onClick={() => { loadChat(chat); console.log('onClick') }} id={chat.chatId}>
+                <div className='side-menu-newChat' onClick={() => { loadChat(chat)}} id={chat.chatId}>
                   <div style={{ width: '180px' }}>
                     {chat.chatName}
                   </div>
@@ -283,7 +282,19 @@ const App = () => {
               <br></br>
               <br></br>
               KI Chat Bot<br />
-              <span className='sub-text'>Gebe eine Frage ein und ich werde dir schon helfen!</span>
+              <span className='sub-text'>Stelle eine Frage und ich werde dir schon helfen!<br/>
+              <br/>
+              <strong>Paar Tipps für die Benutzung:</strong>
+              <br/>
+              <br/>
+              Nachdem du eine Frage gestellt hast, klicke auf das Senden-Symbol oder drücke die <br/>Eingabetaste. 
+              Falls du die Anfrage abbrechen möchtest, klicke auf das Animations-Symbol.
+              <br/>
+              <br/>
+              Zudem kannst du mit dem Toogle Switch die Antworten der KI übersetzen lassen. 
+              Die Qualität <br/> der Übersetzung kann variieren.
+              Unsere Empfehlung ist, die Antworten in der Originalsprache<br/> zu lesen.
+              </span>
             </h1>
           }
         </div>
@@ -300,9 +311,9 @@ const App = () => {
             </form>
             <span className='chat-input-icon'>
               {loading ? (
-                <div className="loader"></div>
+                <div className="loader" onClick={cancelRequest}></div>
               ) : (
-                <svg onClick={handleSubmit} stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-1" height="1.13em" width="1.13em" xmlns="http://www.w3.org/2000/svg">
+                <svg onClick={handleSubmit} stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-1" height="1.13em" width="1.13em" xmlns="http://www.w3.org/2000/svg" style={{ cursor: 'pointer' }}>
                   <line x1="22" y1="2" x2="11" y2="13"></line>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                 </svg>
