@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import "../styles/main.css";
 import "../styles/normalize.css";
 import "../styles/loader.css";
+import ToggleSwitch from "../components/ToggleSwitch";
 
 const App = () => {
   const [input, setInput] = useState("");
@@ -15,6 +16,7 @@ const App = () => {
   const [selectedChatNumber, setSelectedChatNumber] = useState(getNextChatId());
   const [highestChatNumber] = useState(getHighestChatNumber());
   const [abortController, setAbortController] = useState(new AbortController());
+  const [toggleValue, setToggleValue] = useState(false);
 
   useEffect(() => {
     if (highestChatNumber !== -1) {
@@ -29,6 +31,11 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('mode', mode);
   }, [mode]);
+
+  const handleToggleChange = () => {
+    setToggleValue(!toggleValue);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -39,6 +46,7 @@ const App = () => {
     setAbortController(controller);
   
     try {
+      // toggleValue einbauen für den Fall, dass der User die Übersetzung aktiviert 
       const response = await fetch('http://localhost:11434/api/chat', {
         method: 'POST',
         headers: {
@@ -299,6 +307,7 @@ const App = () => {
           }
         </div>
         <div className={`chat-input blur`} >
+         
           <div className={`chat-input-div`} >
             <form onSubmit={handleSubmit}>
               <input
@@ -319,8 +328,11 @@ const App = () => {
                 </svg>
               )}
             </span>
-          </div>
-        </div>
+            <React.Fragment>
+        <ToggleSwitch label=" " value={toggleValue} onChange={handleToggleChange}/>
+      </React.Fragment>
+            </div>
+      </div>
       </section>
     </div>
   )
