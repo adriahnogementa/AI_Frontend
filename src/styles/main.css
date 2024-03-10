@@ -212,6 +212,10 @@ a{
   overflow-y: auto;
 }
 
+.toggleSwitch {
+  margin-left: 40px;
+}
+
 ul{
   list-style-type: none;
   padding: 0;

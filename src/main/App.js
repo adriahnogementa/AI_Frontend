@@ -44,7 +44,7 @@ const App = () => {
     setInput("");
     const controller = new AbortController();
     setAbortController(controller);
-  
+
     try {
       // toggleValue einbauen für den Fall, dass der User die Übersetzung aktiviert 
       const response = await fetch('http://localhost:11434/api/chat', {
@@ -60,17 +60,17 @@ const App = () => {
           }],
           stream: false
         }),
-        signal: controller.signal 
+        signal: controller.signal
       });
-  
+
       const data = await response.json();
       console.log(data);
-  
+
       if (data.message) {
         setChatLog(prev => [...prev, { user: "mistral", message: data.message.content }]);
         saveToLocalStorage(input, data.message.content);
       }
-  
+
       setLoading(false);
     } catch (error) {
       setChatLog(prev => [...prev, { user: "mistral", message: "Entschuldigung, ich konnte deine Anfrage nicht verarbeiten." }]);
@@ -79,7 +79,7 @@ const App = () => {
       setLoading(false);
     }
   };
-  
+
 
   const clearChat = () => {
     setChatLog([]);
@@ -116,7 +116,7 @@ const App = () => {
     abortController.abort();
     setLoading(false);
   };
-  
+
 
   function getChatHistory() {
     return JSON.parse(localStorage.getItem("chatHistory")) || [];
@@ -210,25 +210,25 @@ const App = () => {
     event.stopPropagation();
     if (getChatHistory().length === 1) {
       if (window.confirm("Möchtest du diesen Chatinhalt wirklich löschen?")) {
-      let chatHistory = getChatHistory();
-      chatHistory.find(chat => chat.chatId === selectedChat.chatId).messages = [];
-      localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-      setChatHistory(chatHistory);
-      clearChat();
-      loadChat(getChatById(selectedChat.chatId));
+        let chatHistory = getChatHistory();
+        chatHistory.find(chat => chat.chatId === selectedChat.chatId).messages = [];
+        localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+        setChatHistory(chatHistory);
+        clearChat();
+        loadChat(getChatById(selectedChat.chatId));
       }
-    }else{
-    if (window.confirm("Möchtest du diesen Chat wirklich löschen?")) {
-      let chats = getChatHistory();
-      chats = chats.filter(chat => chat.chatId !== selectedChat.chatId);
-      localStorage.setItem("chatHistory", JSON.stringify(chats));
-      setChatHistory(chats);
-      if (selectedChat.chatId === selectedChatNumber) {
-        console.log("highestChatNumber: " + getHighestChatNumber());
-        loadChatById(getHighestChatNumber());
+    } else {
+      if (window.confirm("Möchtest du diesen Chat wirklich löschen?")) {
+        let chats = getChatHistory();
+        chats = chats.filter(chat => chat.chatId !== selectedChat.chatId);
+        localStorage.setItem("chatHistory", JSON.stringify(chats));
+        setChatHistory(chats);
+        if (selectedChat.chatId === selectedChatNumber) {
+          console.log("highestChatNumber: " + getHighestChatNumber());
+          loadChatById(getHighestChatNumber());
+        }
       }
     }
-  }
   }
 
   function getHighestChatNumber() {
@@ -245,7 +245,7 @@ const App = () => {
           <ul>
             {chatHistory.slice(0).reverse().map((chat, index) => (
               <li key={index}>
-                <div className='side-menu-newChat' onClick={() => { loadChat(chat)}} id={chat.chatId}>
+                <div className='side-menu-newChat' onClick={() => { loadChat(chat) }} id={chat.chatId}>
                   <div style={{ width: '180px' }}>
                     {chat.chatName}
                   </div>
@@ -290,24 +290,24 @@ const App = () => {
               <br></br>
               <br></br>
               KI Chat Bot<br />
-              <span className='sub-text'>Stelle eine Frage und ich werde dir schon helfen!<br/>
-              <br/>
-              <strong>Paar Tipps für die Benutzung:</strong>
-              <br/>
-              <br/>
-              Nachdem du eine Frage gestellt hast, klicke auf das Senden-Symbol oder drücke die <br/>Eingabetaste. 
-              Falls du die Anfrage abbrechen möchtest, klicke auf das Animations-Symbol.
-              <br/>
-              <br/>
-              Zudem kannst du mit dem Toogle Switch die Antworten der KI übersetzen lassen. 
-              Die Qualität <br/> der Übersetzung kann variieren.
-              Unsere Empfehlung ist, die Antworten in der Originalsprache<br/> zu lesen.
+              <span className='sub-text'>Stelle eine Frage und ich werde dir schon helfen!<br />
+                <br />
+                <strong>Paar Tipps für die Benutzung:</strong>
+                <br />
+                <br />
+                Nachdem du eine Frage gestellt hast, klicke auf das Senden-Symbol oder drücke die <br />Eingabetaste.
+                Falls du die Anfrage abbrechen möchtest, klicke auf das Animations-Symbol.
+                <br />
+                <br />
+                Zudem kannst du mit dem Toogle Switch die Antworten der KI übersetzen lassen.
+                Die Qualität <br /> der Übersetzung kann variieren.
+                Unsere Empfehlung ist, die Antworten in der Originalsprache<br /> zu lesen.
               </span>
             </h1>
           }
         </div>
         <div className={`chat-input blur`} >
-         
+
           <div className={`chat-input-div`} >
             <form onSubmit={handleSubmit}>
               <input
@@ -328,11 +328,13 @@ const App = () => {
                 </svg>
               )}
             </span>
+            <div className = {'toggleSwitch'}>
             <React.Fragment>
-        <ToggleSwitch label=" " value={toggleValue} onChange={handleToggleChange}/>
-      </React.Fragment>
+              <ToggleSwitch label=" " value={toggleValue} onChange={handleToggleChange} />
+            </React.Fragment>
             </div>
-      </div>
+          </div>
+        </div>
       </section>
     </div>
   )
@@ -356,17 +358,17 @@ const ChatMessage = ({ message, mode }) => {
   return (
     <div className={`chat-message ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`} >
       <div className='chat-message-center'>
-      <img src= {message.user === 'me' ? "..\\assets\\user-message.png" : "..\\assets\\ai-message.png"} className="avatar" />
-          {
-            message.user === 'chatgpt' &&
-            <svg width="30" height="30" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg" strokeWidth="1.5" class="h-6 w-6">
-            </svg>
-          }
-        
+        <img src={message.user === 'me' ? "..\\assets\\user-message.png" : "..\\assets\\ai-message.png"} className="avatar" />
+        {
+          message.user === 'chatgpt' &&
+          <svg width="30" height="30" viewBox="0 0 41 41" fill="none" xmlns="http://www.w3.org/2000/svg" strokeWidth="1.5" class="h-6 w-6">
+          </svg>
+        }
+
         <div className='message' >
           <p dangerouslySetInnerHTML={{ __html: formatTextToHTML(message.message) }}></p>
         </div>
       </div>
-       </div>
+    </div>
   )
 }
