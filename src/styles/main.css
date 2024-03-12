@@ -48,6 +48,8 @@
   display: flex;
   text-align: center;
   justify-content: center;
+  
+  
 }
 form{
   width: 100%;
@@ -73,6 +75,7 @@ form{
   justify-content: space-between;
   flex-direction: column;
   background-color: #202123;
+  overflow: hidden;
 }
 .side-menu-bottom{
   display: flex;
@@ -101,13 +104,6 @@ a{
   color: #84888f;
   left: -16px;
 }
-.chat-input-icon:hover {
-  transition: 0.5s all;
-  cursor: pointer;
-  left: -45px;
-  top: 12px;
-  rotate: 40deg;
-}
 .side-menu-newChat {
   align-content: center;
   border: 0.5px solid rgb(77, 77, 77);
@@ -119,6 +115,7 @@ a{
   padding: 0.75rem;
   padding-left: 1.2rem;
   align-items: center;
+  margin-bottom: 10px;
 }
 .plus {
   position: relative;
@@ -132,6 +129,7 @@ a{
   transition: 0.25s all;
   background-color: #333639;
 }
+
 
 .chat-about {
   color: #adacac;
@@ -177,10 +175,9 @@ a{
 }
 
 .avatar {
-    background-color: rgb(16, 163, 127);
   border-radius: 50%;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
 }
 .chatGPT{
     border-radius: 2px;
@@ -201,4 +198,26 @@ a{
 .bg-white .chat-message:nth-child(even){
   color: #18181a;
   background-color: #f7f7f8!important;
+}
+
+.chat-history {
+  top: 5rem;
+  bottom: 5rem;
+  padding: 8px;
+  width: 200px;
+  color: #fff;
+  position: absolute;
+  flex-direction: column;
+  background-color: #202123;
+  overflow-y: auto;
+}
+
+.toggleSwitch {
+  margin-left: 40px;
+}
+
+ul{
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
