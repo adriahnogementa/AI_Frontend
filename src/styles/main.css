@@ -130,6 +130,10 @@ a{
   background-color: #333639;
 }
 
+.side-menu-newChat.selected-chat {
+  background-color: #4d5358;
+}
+
 
 .chat-about {
   color: #adacac;

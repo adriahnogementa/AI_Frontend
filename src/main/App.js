@@ -245,7 +245,7 @@ const App = () => {
           <ul>
             {chatHistory.slice(0).reverse().map((chat, index) => (
               <li key={index}>
-                <div className='side-menu-newChat' onClick={() => { loadChat(chat) }} id={chat.chatId}>
+                <div className={`side-menu-newChat ${selectedChatNumber === chat.chatId ? 'selected-chat' : ''}`} onClick={() => { loadChat(chat) }} id={chat.chatId}>
                   <div style={{ width: '180px' }}>
                     {chat.chatName}
                   </div>
