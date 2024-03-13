@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import "../styles/main.css";
 import "../styles/normalize.css";
 import "../styles/loader.css";
@@ -17,6 +17,7 @@ const App = () => {
   const [highestChatNumber] = useState(getHighestChatNumber());
   const [abortController, setAbortController] = useState(new AbortController());
   const [toggleValue, setToggleValue] = useState(false);
+  const chatLogContainerRef = useRef(null);
 
   useEffect(() => {
     if (highestChatNumber !== -1) {
@@ -27,6 +28,13 @@ const App = () => {
     }
 
   }, []);
+
+  useEffect(() => {
+    // Scroll to the bottom when chat log updates
+    if (chatLogContainerRef.current) {
+      chatLogContainerRef.current.scrollTop = chatLogContainerRef.current.scrollHeight;
+    }
+  }, [chatLog]);
 
   useEffect(() => {
     localStorage.setItem('mode', mode);
@@ -278,7 +286,7 @@ const App = () => {
           </div>
         </div>
       </aside>
-      <section className={`chatbox ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`} >
+      <section  ref={chatLogContainerRef} className={`chatbox ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`} >
         <div className='chat-log'>
           {chatLog.length > 0 ?
             chatLog.map((el, i) => {
