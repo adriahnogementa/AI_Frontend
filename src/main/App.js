@@ -243,6 +243,15 @@ const App = () => {
     return getNextChatId() - 1;
   }
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && e.shiftKey) {
+      setInput((prevInput) => prevInput + '\n');
+    } else if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   return (
     <div className='app'>
       <aside className='side-menu'>
@@ -253,7 +262,7 @@ const App = () => {
           <ul>
             {chatHistory.slice(0).reverse().map((chat, index) => (
               <li key={index}>
-                <div className='side-menu-newChat' onClick={() => { loadChat(chat) }} id={chat.chatId}>
+                <div className={`side-menu-newChat ${selectedChatNumber === chat.chatId ? 'selected-chat' : ''}`} onClick={() => { loadChat(chat) }} id={chat.chatId}>
                   <div style={{ width: '180px' }}>
                     {chat.chatName}
                   </div>
@@ -318,12 +327,13 @@ const App = () => {
 
           <div className={`chat-input-div`} >
             <form onSubmit={handleSubmit}>
-              <input
+              <textarea
                 placeholder='Frage eingeben...'
                 className={`chat-input-box ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`}
                 value={input}
                 disabled={loading}
                 onChange={(e) => { setInput(e.target.value) }}
+                onKeyDown={handleKeyDown}
               />
             </form>
             <span className='chat-input-icon'>
@@ -358,8 +368,10 @@ const ChatMessage = ({ message, mode }) => {
     text = text.replace(/(\d+\.\s)/g, '</li><li>');
     text = '<p>' + text + '</p>';
     text = text.replace(/<p>(\d+\.\s)(.*?)<\/p>/g, '<ul><li>$2</li></ul>');
-    text = text.replace(/\b(?:https?|ftp):\/\/\S+\b/g, match => `<a href="${match}" target="_blank">${match}</a>`);
+    //<br> tag for URLs entfernen
+    text = text.replace(/<br>/g, '');
 
+    text = text.replace(/\b(?:https?|ftp):\/\/[^\s/]+(?:\/[^\s]*)?(?=\s|$)/g, match => `<a href="${match}" target="_blank">${match}</a>`);
     return text;
   }
 
