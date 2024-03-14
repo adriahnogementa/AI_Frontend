@@ -370,6 +370,7 @@ export default App
 const ChatMessage = ({ message, mode }) => {
 
   const formatTextToHTML = (text) => {
+    text = text.replace(/\b(?:https?|ftp):\/\/[^\s/]+(?:\/[^\s]*)?(?=\s|$)/g, match => `<a href="${match}" target="_blank">${match}</a>`);
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/\n\n/g, '</p><p>');
     text = text.replace(/\n/g, '<br>');
@@ -378,8 +379,7 @@ const ChatMessage = ({ message, mode }) => {
     text = text.replace(/<p>(\d+\.\s)(.*?)<\/p>/g, '<ul><li>$2</li></ul>');
     //<br> tag for URLs entfernen
     text = text.replace(/<br>/g, '');
-
-    text = text.replace(/\b(?:https?|ftp):\/\/[^\s/]+(?:\/[^\s]*)?(?=\s|$)/g, match => `<a href="${match}" target="_blank">${match}</a>`);
+   
     return text;
   }
 
