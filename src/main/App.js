@@ -385,8 +385,8 @@ const ChatMessage = ({ message, mode }) => {
   const formatTextToHTML = (text) => {
     text = linkify(text);
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    text = text.replace(/```\s*(.*?)\s*```/s, '<code>$1</code>');
-    text = text.replace(/`(.+?)`/g, '<span>$1</span>');
+    text = text.replace(/```\s*(.*?)\s*```/s, '<code class="prettyprint">$1</code>');
+    text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
     text = text.replace(/\n\n/g, '</p><p>');
     text = text.replace(/\n/g, '<br>');
     text = text.replace(/(\d+\.\s)/g, '</li><li>');
