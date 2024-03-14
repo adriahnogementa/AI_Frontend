@@ -247,6 +247,8 @@ const App = () => {
     }
   }
 
+  
+
   function getHighestChatNumber() {
     return getNextChatId() - 1;
   }
@@ -259,6 +261,8 @@ const App = () => {
       handleSubmit(e);
     }
   };
+
+
 
   return (
     <div className='app'>
@@ -369,8 +373,15 @@ export default App
 
 const ChatMessage = ({ message, mode }) => {
 
+  function linkify(text) {
+    var urlRegex =/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    return text.replace(urlRegex, function(url) {
+        return '<a href="' + url + '">' + url + '</a>';
+    });
+};
+
   const formatTextToHTML = (text) => {
-    text = text.replace(/\b(?:https?|ftp):\/\/[^\s/]+(?:\/(?:[^\s/0-9]|\/[^\s/])+)*(?=\s|$)/g, match => `<a href="${match}" target="_blank">${match}</a>`);
+    text = linkify(text);
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/\n\n/g, '</p><p>');
     text = text.replace(/\n/g, '<br>');
