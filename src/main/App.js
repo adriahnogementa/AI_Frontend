@@ -5,6 +5,7 @@ import "../styles/normalize.css";
 import "../styles/loader.css";
 import ToggleSwitch from "../components/ToggleSwitch";
 
+
 const App = () => {
   const [input, setInput] = useState("");
   const [chatLog, setChatLog] = useState([]);
@@ -336,6 +337,7 @@ const App = () => {
           }
         </div>
         <div className={`chat-input blur`} >
+          
 
           <div className={`chat-input-div`} >
             <form onSubmit={handleSubmit}>
@@ -384,6 +386,7 @@ const ChatMessage = ({ message, mode }) => {
     text = linkify(text);
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/```\s*(.*?)\s*```/s, '<code>$1</code>');
+    text = text.replace(/`(.+?)`/g, '<span>$1</span>');
     text = text.replace(/\n\n/g, '</p><p>');
     text = text.replace(/\n/g, '<br>');
     text = text.replace(/(\d+\.\s)/g, '</li><li>');
