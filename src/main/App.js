@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import "../styles/main.css";
 import "../styles/normalize.css";
 import "../styles/loader.css";
@@ -30,7 +31,6 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    // Scroll to the bottom when chat log updates
     if (chatLogContainerRef.current) {
       chatLogContainerRef.current.scrollTop = chatLogContainerRef.current.scrollHeight;
     }
@@ -53,30 +53,38 @@ const App = () => {
     const controller = new AbortController();
     setAbortController(controller);
 
-    try {
-      // toggleValue einbauen für den Fall, dass der User die Übersetzung aktiviert 
-      const response = await fetch('http://localhost:11434/api/chat', {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: 'mistral',
-          messages: [{
-            role: 'user',
-            content: input
-          }],
-          stream: false
-        }),
-        signal: controller.signal
-      });
+      console.log(input); 
 
-      const data = await response.json();
-      console.log(data);
+      const encodedQuestion = encodeURIComponent(input); 
+      console.log(encodedQuestion); 
 
-      if (data.message) {
-        setChatLog(prev => [...prev, { user: "mistral", message: data.message.content }]);
-        saveToLocalStorage(input, data.message.content);
+      const translate = toggleValue;
+      console.log(translate);
+
+      const translateParam = translate.toString();
+
+      const url = `https://hsw.westeurope.cloudapp.azure.com:8000/question6?data=${encodedQuestion}&translate=${translateParam}`; 
+
+      console.log(url); 
+
+    try { 
+
+    const response = await axios.get(url, { 
+
+      withCredentials: true, 
+
+      crossDomain: true, 
+
+    }); 
+
+ 
+    const answer = response.data.answer; 
+
+    console.log(answer); 
+
+      if (answer) {
+        setChatLog(prev => [...prev, { user: "mistral", message: answer }]);
+        saveToLocalStorage(input, answer);
       }
 
       setLoading(false);
