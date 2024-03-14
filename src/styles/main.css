@@ -191,6 +191,11 @@ a{
   color: #2d2f32;
   background-color: #e3ebf4!important;
 }
+
+.bg-white a {
+  color: black;
+}
+
 .bg-dark{
   color: #dbdde0;
   background-color: #3c3d44;

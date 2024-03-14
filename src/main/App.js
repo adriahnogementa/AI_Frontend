@@ -370,15 +370,13 @@ export default App
 const ChatMessage = ({ message, mode }) => {
 
   const formatTextToHTML = (text) => {
-    text = text.replace(/\b(?:https?|ftp):\/\/[^\s/]+(?:\/[^\s]*)?(?=\s|$)/g, match => `<a href="${match}" target="_blank">${match}</a>`);
+    text = text.replace(/\b(?:https?|ftp):\/\/[^\s/]+(?:\/(?:[^\s/0-9]|\/[^\s/])+)*(?=\s|$)/g, match => `<a href="${match}" target="_blank">${match}</a>`);
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     text = text.replace(/\n\n/g, '</p><p>');
     text = text.replace(/\n/g, '<br>');
     text = text.replace(/(\d+\.\s)/g, '</li><li>');
     text = '<p>' + text + '</p>';
     text = text.replace(/<p>(\d+\.\s)(.*?)<\/p>/g, '<ul><li>$2</li></ul>');
-    //<br> tag for URLs entfernen
-    text = text.replace(/<br>/g, '');
    
     return text;
   }
