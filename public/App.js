@@ -3,7 +3,7 @@ import axios from 'axios';
 import "../styles/main.css";
 import "../styles/normalize.css";
 import "../styles/loader.css";
-import ToggleSwitch from "../components/ToggleSwitch";
+import ToggleSwitch from "./components/ToggleSwitch";
 
 
 const App = () => {
@@ -54,34 +54,34 @@ const App = () => {
     const controller = new AbortController();
     setAbortController(controller);
 
-      console.log(input); 
+    console.log(input);
 
-      const encodedQuestion = encodeURIComponent(input); 
-      console.log(encodedQuestion); 
+    const encodedQuestion = encodeURIComponent(input);
+    console.log(encodedQuestion);
 
-      const translate = toggleValue;
-      console.log(translate);
+    const translate = toggleValue;
+    console.log(translate);
 
-      const translateParam = translate.toString();
+    const translateParam = translate.toString();
 
-      const url = `https://hsw.westeurope.cloudapp.azure.com:8000/question6?data=${encodedQuestion}&translate=${translateParam}`; 
+    const url = `https://hsw.westeurope.cloudapp.azure.com:8000/question6?data=${encodedQuestion}&translate=${translateParam}`;
 
-      console.log(url); 
+    console.log(url);
 
-    try { 
+    try {
 
-    const response = await axios.get(url, { 
+      const response = await axios.get(url, {
 
-      withCredentials: true, 
+        withCredentials: true,
 
-      crossDomain: true, 
+        crossDomain: true,
 
-    }); 
+      });
 
- 
-    const answer = response.data.answer; 
 
-    console.log(answer); 
+      const answer = response.data.answer;
+
+      console.log(answer);
 
       if (answer) {
         setChatLog(prev => [...prev, { user: "mistral", message: answer }]);
@@ -248,7 +248,7 @@ const App = () => {
     }
   }
 
-  
+
 
   function getHighestChatNumber() {
     return getNextChatId() - 1;
@@ -257,7 +257,7 @@ const App = () => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && e.shiftKey) {
       setInput((prevInput) => prevInput + '\n');
-    } else if(e.key === 'Enter' && !e.shiftKey){
+    } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
     }
@@ -308,7 +308,7 @@ const App = () => {
           </div>
         </div>
       </aside>
-      <section  ref={chatLogContainerRef} className={`chatbox ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`} >
+      <section ref={chatLogContainerRef} className={`chatbox ${mode === 'dark' ? 'bg-dark' : 'bg-white'}`} >
         <div className='chat-log'>
           {chatLog.length > 0 ?
             chatLog.map((el, i) => {
@@ -337,7 +337,7 @@ const App = () => {
           }
         </div>
         <div className={`chat-input blur`} >
-          
+
 
           <div className={`chat-input-div`} >
             <form onSubmit={handleSubmit}>
@@ -360,10 +360,10 @@ const App = () => {
                 </svg>
               )}
             </span>
-            <div className = {'toggleSwitch'}>
-            <React.Fragment>
-              <ToggleSwitch label=" " value={toggleValue} onChange={handleToggleChange} />
-            </React.Fragment>
+            <div className={'toggleSwitch'}>
+              <React.Fragment>
+                <ToggleSwitch label=" " value={toggleValue} onChange={handleToggleChange} />
+              </React.Fragment>
             </div>
           </div>
         </div>
@@ -376,11 +376,11 @@ export default App
 const ChatMessage = ({ message, mode }) => {
 
   function linkify(text) {
-    var urlRegex =/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-    return text.replace(urlRegex, function(url) {
-        return '<a href="' + url + '">' + url + '</a>';
+    var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    return text.replace(urlRegex, function (url) {
+      return '<a href="' + url + '">' + url + '</a>';
     });
-};
+  };
 
   const formatTextToHTML = (text) => {
     text = linkify(text);
@@ -392,7 +392,7 @@ const ChatMessage = ({ message, mode }) => {
     text = text.replace(/(\d+\.\s)/g, '</li><li>');
     text = '<p>' + text + '</p>';
     text = text.replace(/<p>(\d+\.\s)(.*?)<\/p>/g, '<ul><li>$2</li></ul>');
-   
+
     return text;
   }
 
