@@ -6,7 +6,7 @@
   "homepage": "https://adriahnogementa.github.io/AI_Frontend/",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d build",
     "build": "webpack",
     "dev": "webpack serve"
   },
